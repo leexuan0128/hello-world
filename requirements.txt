@@ -1,1 +1,4 @@
 The project requirements are listed below. Please completed them by due date!
+	(1) Complete the lexer module by end of the May.
+	(2) Update the iterator.
+	(3) Pass the function test.
