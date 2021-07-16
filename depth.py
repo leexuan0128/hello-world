@@ -24,26 +24,37 @@ def read_pfm(pfm_file_path):
             scale = -scale
         else:
             endian = '>'  # big endian  
-        dispariy = np.fromfile(pfm_file, endian + 'f') 
+        disparity = np.fromfile(pfm_file, endian + 'f') 
 
-    img = np.reshape(dispariy, newshape=(height, width, channels))
-    img = np.flipud(img).astype('uint8')
-    #np.savetxt(r"./dispariy.txt", dispariy_true, fmt='%f', delimiter=' ')
-    cv2.imwrite("./disparity_map_4.png", img)
+    new_disparity = np.reshape(disparity, newshape=(height, width))
+    np.savetxt(r"./dispariy.txt", new_disparity, fmt='%f', delimiter=' ')
+
+    disparity_img = np.reshape(disparity, newshape=(height, width, channels))
+    #img = np.flipud(img).astype('uint8') 
+    disparity_img = np.flipud(disparity_img).astype('float32')
+    cv2.imwrite("./disparity_map.png", disparity_img)
     #show(img, "disparity")
 
-    return dispariy, [(height, width, channels), scale]
+    return disparity, [(height, width, channels), scale]
 
 def create_depths_map(pfm_file_path):
-    disparity, [shape, scale] = read_pfm(pfm_file_path)
+    disparity, [(height, width, channels), scale] = read_pfm(pfm_file_path)
     focal_length = read_focal_length(15)[0]
     baseline = read_baseline('Transformation.txt')
-
     depth_map = (focal_length * baseline) / disparity
-    depth_map = np.reshape(depth_map, newshape=shape)
-    depth_map = np.flipud(depth_map).astype('uint8')
-    #np.savetxt(r"./depth.txt", depth_map, fmt='%f', delimiter=' ')
 
+    new_depth = np.reshape(depth_map, newshape=(height, width))
+    np.savetxt(r"./depth.txt", new_depth, fmt='%f', delimiter=' ')
+
+    depth_img = np.reshape(depth_map, newshape=(height, width, channels))
+    #depth_img = np.flipud(depth_map).astype('float32')
+    depth_img = np.flipud(depth_img).astype('uint8')     
+    cv2.imwrite("./depth_map.png", depth_img)
+
+    #depth_map = np.squeeze(depth_img, 2)
+    depth_map = new_depth[np.newaxis, np.newaxis, :, :]
+    
+    # depth_map (Nx1xHxW)
     return depth_map
 
 def show(img, win_name='image'):

@@ -8,6 +8,8 @@ from reprojection import Reprojection
 
 from depth import*
 from functional_data import*
+from flow2img import*
+from IO import*
 
 import argparse
 import os
@@ -17,6 +19,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from PIL import Image
+
+torch.set_default_dtype(torch.float64)
 
 # from raft import RAFT
 # from utils import flow_viz
@@ -42,16 +46,30 @@ def rigid_flow():
     # width = 960
     # height = 540
     fx, K, inv_K = read_focal_length(15)
-    T = read_transformation('Transformation.txt')[0]
+    T = read_transformation('Transformation.txt')
+    T = T[np.newaxis, :, :]
+    T = torch.from_numpy(T)
     B = read_baseline('Transformation.txt')
 
     disparity_path_dir = Path(r"./disparity/")
-    pfm_images = disparity_path_dir.joinpath('0048.pfm')
+    pfm_images = disparity_path_dir.joinpath('0400.pfm')
     depth = create_depths_map(pfm_images)
 
     reprojections = Reprojection(540,960)
-    reprojections.forward(depth, T, K, inv_K)
+    x2 = reprojections.forward(depth, T, K, inv_K)
+    print(x2)
+    x1 = read_original_coords(540, 960)
+    print(x1)
+    flow =  x2 - x1
+    flow = torch.squeeze(flow)
+    flow = flow.numpy().astype('float32')
+    print(flow)
+    filename = "rigid_flow.flo"
+    writeFlow("rigid_flow.flo", flow)
 
+    flow2img(flow)
+    #flow = flow.astype('uint8')
+    visulize_flow_file(filename)
 
 if __name__ == '__main__':
     rigid_flow()

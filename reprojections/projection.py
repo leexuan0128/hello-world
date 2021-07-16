@@ -15,7 +15,7 @@ class Projection(nn.Module):
         self.width = width
         self.eps = eps
 
-    def forward(self, points3d, K, normalized=True):
+    def forward(self, points3d, K, normalized=False):
         """
         Args:
             points3d (Nx4x(HxW)): 3D points in homogeneous coordinates

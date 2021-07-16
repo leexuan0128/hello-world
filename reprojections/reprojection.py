@@ -8,6 +8,7 @@ from backprojection import Backprojection
 from transformation3d import Transformation3D
 from projection import Projection
 
+torch.set_default_dtype(torch.float64)
 
 class Reprojection(nn.Module):
     """Layer to transform pixel coordinates from one view to another view via
@@ -38,5 +39,6 @@ class Reprojection(nn.Module):
         """
         points3d = self.backproj(depth, inv_K)
         points3d_trans = self.transform(points3d, T)
-        xy = self.project(points3d_trans, K) 
+        xy = self.project(points3d_trans, K)
+        #print(xy)
         return xy
